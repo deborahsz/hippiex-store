@@ -1,16 +1,34 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text } from 'react-native';
 
-export default function Button({ children, variant = 'primary', style, ...props }) {
+export default function Button({
+  children,
+  loading = false,
+  variant = 'primary',
+  style,
+  disabled,
+  ...props
+}) {
   const isSecondary = variant === 'secondary';
+  const isDisabled = disabled || loading;
 
   return (
     <Pressable
-      style={[styles.button, isSecondary && styles.secondaryButton, style]}
+      disabled={isDisabled}
+      style={[
+        styles.button,
+        isSecondary && styles.secondaryButton,
+        isDisabled && styles.disabledButton,
+        style,
+      ]}
       {...props}
     >
-      <Text style={[styles.text, isSecondary && styles.secondaryText]}>
-        {children}
-      </Text>
+      {loading ? (
+        <ActivityIndicator color="#FFFFFF" />
+      ) : (
+        <Text style={[styles.text, isSecondary && styles.secondaryText]}>
+          {children}
+        </Text>
+      )}
     </Pressable>
   );
 }
@@ -25,6 +43,9 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     backgroundColor: '#111111',
+  },
+  disabledButton: {
+    opacity: 0.65,
   },
   text: {
     color: '#FFFFFF',
