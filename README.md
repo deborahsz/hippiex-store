@@ -1,84 +1,85 @@
 # Hippiex Store
 
-Aplicativo mobile desenvolvido para a marca Hippiex, com o objetivo de apresentar camisetas e facilitar reservas/pedidos de forma simples.
+Aplicativo mobile da Hippiex para catálogo de camisetas, reservas e pedidos.
 
-O projeto foi feito como atividade acadêmica de React Native, com frontend em Expo e backend em Node.js.
+O projeto foi desenvolvido como atividade acadêmica de React Native. Ele reúne um frontend em Expo e uma API em Node.js, com autenticação, catálogo de produtos, registro de pedidos e histórico por usuário.
 
-## Sobre o projeto
+## Sobre
 
-A Hippiex é uma pequena marca de camisetas que fazia o atendimento principalmente por redes sociais e WhatsApp. A proposta do aplicativo é centralizar os produtos em um catálogo e permitir que o cliente escolha uma camiseta, selecione tamanho, forma de pagamento e finalize uma **reserva** ou uma **compra**.
+A Hippiex atende clientes interessados em camisetas estampadas. A ideia do app é deixar esse fluxo mais organizado: o cliente cria uma conta, consulta os produtos, escolhe tamanho e forma de pagamento, e registra uma reserva ou compra.
 
-O app não possui pagamento real integrado. A escolha entre Pix e Dinheiro é registrada apenas como parte do pedido, e o pagamento é combinado fora do aplicativo.
+O pagamento não é processado dentro do aplicativo. As opções Pix e Dinheiro ficam salvas no pedido para combinar o acerto fora do app.
 
-## Tecnologias utilizadas
+## Funcionalidades
+
+- Cadastro e login de usuário
+- Senhas salvas com hash bcrypt
+- Autenticação com token JWT
+- Sessão persistente no aplicativo
+- Catálogo com imagens e detalhes das camisetas
+- Reserva ou compra com seleção de tamanho
+- Registro de pedidos por usuário autenticado
+- Histórico de pedidos
+- Testes automatizados no backend
+
+## Tecnologias
 
 ### Frontend
 
 - React Native
 - Expo SDK 54
-- React Navigation (com fluxo autenticado e não autenticado)
-- Context API (estado de autenticação)
-- AsyncStorage (sessão persistente)
-- Axios (com interceptor de token JWT)
+- React Navigation
+- Context API
+- AsyncStorage
+- Axios
 
 ### Backend
 
 - Node.js
 - Express
-- API REST
-- Autenticação com JWT (`jsonwebtoken`)
-- Hash de senha com `bcryptjs`
-- Arquivos JSON para armazenamento local (escrita atômica e serializada)
+- JWT
+- bcryptjs
+- Arquivos JSON para dados locais
+- node:test
+- ESLint
 
-## Estrutura de pastas
+## Estrutura
 
 ```txt
 .
 ├── backend
 │   ├── src
-│   │   ├── config        # configuração via variáveis de ambiente
+│   │   ├── config
 │   │   ├── controllers
-│   │   ├── data          # produtos, usuários, pedidos e imagens
-│   │   ├── lib           # store JSON seguro, validadores, helpers
-│   │   ├── middlewares   # autenticação e tratamento de erros
+│   │   ├── data
+│   │   ├── lib
+│   │   ├── middlewares
 │   │   └── routes
-│   └── test              # testes (node:test)
+│   └── test
 └── frontend
     └── src
         ├── components
-        ├── context       # AuthContext
+        ├── context
         ├── navigation
         ├── screens
-        ├── services      # cliente axios
-        └── utils         # formatação
+        ├── services
+        └── utils
 ```
 
-## Funcionalidades
+## Como executar
 
-- Cadastro de usuário (senha protegida com hash)
-- Login com geração de token JWT
-- Sessão persistente (continua logado ao reabrir o app) e logout
-- Catálogo de camisetas
-- Detalhes do produto
-- Reserva **ou** compra (com escolha de tamanho e forma de pagamento)
-- Registro de pedido vinculado ao usuário autenticado
-- Histórico de pedidos do usuário
-- Confirmação com número do pedido
-
-## Como executar o projeto
-
-Antes de começar, instale as dependências do backend e do frontend.
+Instale as dependências em cada pasta.
 
 ### Backend
 
 ```bash
 cd backend
 npm install
-cp .env.example .env   # opcional em desenvolvimento
-npm run dev            # usa nodemon (recarrega ao salvar)
+cp .env.example .env
+npm run dev
 ```
 
-A API ficará disponível em:
+A API roda em:
 
 ```txt
 http://localhost:3333
@@ -94,88 +95,71 @@ npm install
 npx expo start
 ```
 
-Depois, escaneie o QR Code com o aplicativo Expo Go no celular.
+Depois, abra pelo Expo Go ou pelo emulador.
 
-Para limpar o cache do Expo, use:
+Para limpar o cache do Expo:
 
 ```bash
 npx expo start -c
 ```
 
-## Variáveis de ambiente (backend)
+## Variáveis de ambiente
 
-As variáveis ficam em `backend/.env` (veja `backend/.env.example`):
+As variáveis do backend ficam em `backend/.env`. Use `backend/.env.example` como base.
 
-| Variável         | Descrição                                                        | Padrão (dev)             |
-| ---------------- | ---------------------------------------------------------------- | ------------------------ |
-| `PORT`           | Porta da API                                                     | `3333`                   |
-| `NODE_ENV`       | `development` ou `production`                                    | `development`            |
-| `JWT_SECRET`     | Segredo para assinar tokens (**obrigatório em produção**)        | valor inseguro de dev    |
-| `JWT_EXPIRES_IN` | Expiração do token (ex.: `7d`, `12h`)                            | `7d`                     |
-| `BCRYPT_ROUNDS`  | Custo do hash bcrypt                                             | `10`                     |
-| `CORS_ORIGIN`    | `*` ou lista de origens separadas por vírgula                   | `*`                      |
+| Variável | Descrição | Padrão em desenvolvimento |
+| --- | --- | --- |
+| `PORT` | Porta da API | `3333` |
+| `NODE_ENV` | Ambiente da aplicação | `development` |
+| `JWT_SECRET` | Segredo usado nos tokens | valor local de desenvolvimento |
+| `JWT_EXPIRES_IN` | Tempo de validade do token | `7d` |
+| `BCRYPT_ROUNDS` | Custo do hash bcrypt | `10` |
+| `CORS_ORIGIN` | Origens liberadas no CORS | `*` |
 
-## Configuração da URL da API (frontend)
+## URL da API no app
 
-A URL base é resolvida automaticamente em `src/services/api.js`:
+O frontend tenta descobrir automaticamente a URL da API durante o desenvolvimento. Em celular físico pelo Expo Go, ele usa o host do Metro. No emulador Android, usa `10.0.2.2`. Em iOS/web, usa `localhost`.
 
-1. Se `EXPO_PUBLIC_API_URL` estiver definida, ela é usada (ex.: API publicada).
-2. Em dispositivo físico via Expo Go, usa o host do Metro automaticamente.
-3. Em emulador Android, usa `10.0.2.2`; em simulador iOS/web, usa `localhost`.
-
-Para forçar uma URL específica, crie `frontend/.env`:
+Para definir manualmente:
 
 ```txt
 EXPO_PUBLIC_API_URL=http://192.168.0.10:3333
 ```
 
-## Endpoints da API
+## Endpoints
 
 ```txt
-POST /auth/register     -> cria conta e retorna { token, user }
-POST /auth/login        -> autentica e retorna { token, user }
-GET  /products          -> lista de produtos (público)
-GET  /products/:id      -> detalhes de um produto (público)
-POST /orders            -> cria pedido (requer Authorization: Bearer <token>)
-GET  /orders            -> pedidos do usuário autenticado
-GET  /health            -> verificação de status
+POST /auth/register
+POST /auth/login
+GET  /products
+GET  /products/:id
+POST /orders
+GET  /orders
+GET  /health
 ```
 
-As rotas de pedidos exigem o cabeçalho `Authorization: Bearer <token>`.
+As rotas de pedidos exigem `Authorization: Bearer <token>`.
 
-## Testes e qualidade
+## Testes
+
+Backend:
 
 ```bash
-# Backend
 cd backend
-npm test     # testes de unidade e integração (node:test)
-npm run lint # ESLint
-
-# Frontend
-cd frontend
-npm run lint # ESLint (config do Expo)
+npm test
+npm run lint
 ```
 
-## Observações para testar no celular
+Frontend:
 
-- O computador e o celular precisam estar na mesma rede Wi-Fi.
-- O backend precisa estar rodando antes de usar o app.
-- O projeto está usando Expo SDK 54, compatível com Expo Go 54.
-- Para fazer login, primeiro crie uma conta na tela de cadastro.
+```bash
+cd frontend
+npm run lint
+```
 
-## Segurança e dependências
+## Produtos
 
-- Senhas nunca são armazenadas em texto puro: são salvas com hash bcrypt e
-  jamais retornadas pela API.
-- O `npm audit` do frontend reporta vulnerabilidades **moderadas** restritas ao
-  toolchain de build do Expo (`@expo/cli`, `config-plugins`, `postcss`, `uuid`).
-  São dependências de desenvolvimento, não vão para o bundle do app, e o único
-  "fix" disponível é atualizar o Expo SDK (mudança breaking). Por isso não são
-  corrigidas com `npm audit fix --force`; elas se resolvem ao subir o SDK.
-
-## Produtos cadastrados
-
-O catálogo inicial possui 4 camisetas da marca Hippiex, cada uma com nome, preço, descrição, imagem e tamanhos disponíveis.
+O catálogo inicial possui quatro camisetas da Hippiex, cada uma com nome, preço, descrição, imagem e tamanhos disponíveis.
 
 ## Autora
 
