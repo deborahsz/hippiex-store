@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Button, Header, Input } from '../components';
+import api from '../services/api';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -9,7 +10,14 @@ export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  function handleLogin() {
+  function goToCatalog() {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Catalog' }],
+    });
+  }
+
+  async function handleLogin() {
     setError('');
 
     if (!email.trim() || !senha.trim()) {
@@ -17,12 +25,21 @@ export default function LoginScreen({ navigation }) {
       return;
     }
 
-    setLoading(true);
-
-    setTimeout(() => {
+    try {
+      setLoading(true);
+      await api.post('/auth/login', {
+        email: email.trim(),
+        senha,
+      });
+      goToCatalog();
+    } catch (requestError) {
+      const message =
+        requestError.response?.data?.message ||
+        'Não foi possível entrar. Verifique seus dados e tente novamente.';
+      setError(message);
+    } finally {
       setLoading(false);
-      navigation.navigate('Catalog');
-    }, 600);
+    }
   }
 
   return (

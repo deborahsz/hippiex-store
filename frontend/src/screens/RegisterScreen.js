@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Button, Header, Input } from '../components';
+import api from '../services/api';
 
 export default function RegisterScreen({ navigation }) {
   const [nome, setNome] = useState('');
@@ -10,7 +11,14 @@ export default function RegisterScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  function handleRegister() {
+  function goToCatalog() {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Catalog' }],
+    });
+  }
+
+  async function handleRegister() {
     setError('');
 
     if (!nome.trim() || !email.trim() || !senha.trim()) {
@@ -18,12 +26,22 @@ export default function RegisterScreen({ navigation }) {
       return;
     }
 
-    setLoading(true);
-
-    setTimeout(() => {
+    try {
+      setLoading(true);
+      await api.post('/auth/register', {
+        email: email.trim(),
+        nome: nome.trim(),
+        senha,
+      });
+      goToCatalog();
+    } catch (requestError) {
+      const message =
+        requestError.response?.data?.message ||
+        'Não foi possível criar sua conta. Tente novamente.';
+      setError(message);
+    } finally {
       setLoading(false);
-      navigation.navigate('Catalog');
-    }, 600);
+    }
   }
 
   return (
