@@ -15,7 +15,6 @@ function errorHandler(error, _request, response, _next) {
     return response.status(400).json({ message: 'JSON inválido no corpo da requisição.' });
   }
 
-  // Unexpected error: log it server-side, hide details from the client.
   // eslint-disable-next-line no-console
   console.error('[error]', error);
 
