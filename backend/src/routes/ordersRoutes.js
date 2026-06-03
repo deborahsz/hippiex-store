@@ -6,7 +6,6 @@ const { authenticate } = require('../middlewares/auth');
 
 const ordersRoutes = Router();
 
-// All order routes require an authenticated user.
 ordersRoutes.use(authenticate);
 
 ordersRoutes.post('/', asyncHandler(ordersController.create));

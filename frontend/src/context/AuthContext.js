@@ -20,7 +20,6 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Restore a previous session on app start.
   useEffect(() => {
     async function restoreSession() {
       try {
@@ -35,7 +34,6 @@ export function AuthProvider({ children }) {
           setUser(storedUser ? JSON.parse(storedUser) : null);
         }
       } catch {
-        // Corrupted storage: start clean.
         await AsyncStorage.multiRemove([TOKEN_KEY, USER_KEY]).catch(() => {});
       } finally {
         setLoading(false);

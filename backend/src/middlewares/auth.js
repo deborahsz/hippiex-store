@@ -3,10 +3,6 @@ const jwt = require('jsonwebtoken');
 const config = require('../config');
 const AppError = require('../lib/AppError');
 
-/**
- * Express middleware that validates the `Authorization: Bearer <token>`
- * header. On success it attaches `request.user = { id, nome, email }`.
- */
 function authenticate(request, _response, next) {
   const header = request.headers.authorization || '';
   const [scheme, token] = header.split(' ');

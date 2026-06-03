@@ -29,7 +29,6 @@ export default function LoginScreen({ navigation }) {
 
     try {
       setLoading(true);
-      // On success the navigator swaps to the app stack automatically.
       await signIn({ email: email.trim(), senha });
     } catch (requestError) {
       const message =

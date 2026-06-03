@@ -58,8 +58,6 @@ async function login(request, response) {
   const users = await store.read(usersPath);
   const user = users.find((item) => item.email === email);
 
-  // Always run a comparison to keep timing consistent whether or not the
-  // email exists, then fail with a single generic message.
   const matches = user
     ? await bcrypt.compare(senha, user.senha)
     : await bcrypt.compare(senha, '$2a$10$invalidinvalidinvalidinvalidinv');

@@ -30,7 +30,6 @@ export default function OrdersScreen({ navigation }) {
     }
   }
 
-  // Fetch on mount without touching state synchronously inside the effect.
   useEffect(() => {
     let active = true;
 

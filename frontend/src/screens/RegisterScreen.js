@@ -35,7 +35,6 @@ export default function RegisterScreen({ navigation }) {
 
     try {
       setLoading(true);
-      // On success the navigator swaps to the app stack automatically.
       await signUp({ nome: nome.trim(), email: email.trim(), senha });
     } catch (requestError) {
       const message =

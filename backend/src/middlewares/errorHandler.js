@@ -5,7 +5,6 @@ function notFound(_request, response) {
   return response.status(404).json({ message: 'Recurso não encontrado.' });
 }
 
-// eslint-disable-next-line no-unused-vars
 function errorHandler(error, _request, response, _next) {
   if (error instanceof AppError) {
     return response.status(error.statusCode).json({ message: error.message });
@@ -15,7 +14,6 @@ function errorHandler(error, _request, response, _next) {
     return response.status(400).json({ message: 'JSON inválido no corpo da requisição.' });
   }
 
-  // eslint-disable-next-line no-console
   console.error('[error]', error);
 
   return response.status(500).json({

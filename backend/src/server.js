@@ -19,12 +19,10 @@ app.use(express.json());
 app.use('/images', express.static(path.resolve(__dirname, 'data/images')));
 app.use(routes);
 
-// 404 + centralized error handling must come last.
 app.use(notFound);
 app.use(errorHandler);
 
 const server = app.listen(config.port, () => {
-  // eslint-disable-next-line no-console
   console.log(`Hippiex Store API running on port ${config.port}`);
 });
 

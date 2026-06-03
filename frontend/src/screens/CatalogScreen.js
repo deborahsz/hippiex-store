@@ -49,8 +49,6 @@ export default function CatalogScreen({ navigation }) {
     }
   }
 
-  // Fetch on mount without touching state synchronously inside the effect,
-  // and ignore the response if the screen unmounts first.
   useEffect(() => {
     let active = true;
 

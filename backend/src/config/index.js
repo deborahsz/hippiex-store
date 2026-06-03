@@ -10,7 +10,6 @@ if (isProduction && jwtSecret === DEFAULT_JWT_SECRET) {
 }
 
 if (!process.env.JWT_SECRET) {
-  // eslint-disable-next-line no-console
   console.warn(
     '[config] JWT_SECRET not set. Using an insecure development default.'
   );

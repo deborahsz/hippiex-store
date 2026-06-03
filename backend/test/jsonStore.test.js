@@ -37,7 +37,6 @@ test('concurrent updates do not corrupt data or duplicate ids', async () => {
   const uniqueIds = new Set(ids);
   assert.equal(uniqueIds.size, 50, 'all ids must be unique');
 
-  // File must still be valid JSON on disk.
   const raw = await fs.readFile(file, 'utf-8');
   assert.doesNotThrow(() => JSON.parse(raw));
 });

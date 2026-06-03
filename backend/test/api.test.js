@@ -3,7 +3,6 @@ const assert = require('node:assert/strict');
 const fs = require('fs/promises');
 const path = require('path');
 
-// Use a dedicated port and a clean users/orders dataset for the test run.
 process.env.PORT = process.env.TEST_PORT || '4599';
 process.env.JWT_SECRET = 'test-secret';
 
@@ -31,7 +30,6 @@ test.before(async () => {
 
 test.after(async () => {
   await new Promise((resolve) => server.close(resolve));
-  // Restore original data files.
   await fs.writeFile(usersPath, usersBackup);
   await fs.writeFile(ordersPath, ordersBackup);
 });
@@ -50,7 +48,6 @@ async function json(method, route, { token, body } = {}) {
 }
 
 test('full flow: register, login, browse, order, history', async () => {
-  // Register
   const register = await json('POST', '/auth/register', {
     body: { nome: 'Deborah', email: 'deb@test.com', senha: 'senha123' },
   });
@@ -59,25 +56,21 @@ test('full flow: register, login, browse, order, history', async () => {
   assert.equal(register.data.user.email, 'deb@test.com');
   assert.equal(register.data.user.senha, undefined, 'password is never returned');
 
-  // Duplicate email
   const dup = await json('POST', '/auth/register', {
     body: { nome: 'Deborah', email: 'deb@test.com', senha: 'senha123' },
   });
   assert.equal(dup.status, 409);
 
-  // Weak validation
   const bad = await json('POST', '/auth/register', {
     body: { nome: 'X', email: 'bad', senha: '1' },
   });
   assert.equal(bad.status, 400);
 
-  // Login wrong password
   const wrong = await json('POST', '/auth/login', {
     body: { email: 'deb@test.com', senha: 'wrongpass' },
   });
   assert.equal(wrong.status, 401);
 
-  // Login ok
   const login = await json('POST', '/auth/login', {
     body: { email: 'deb@test.com', senha: 'senha123' },
   });
@@ -85,19 +78,16 @@ test('full flow: register, login, browse, order, history', async () => {
   const token = login.data.token;
   assert.ok(token);
 
-  // Products are public
   const products = await json('GET', '/products');
   assert.equal(products.status, 200);
   assert.ok(Array.isArray(products.data) && products.data.length > 0);
   const product = products.data[0];
 
-  // Orders require auth
   const unauth = await json('POST', '/orders', {
     body: { produtoId: product.id, tamanho: product.tamanhos[0], pagamento: 'Pix' },
   });
   assert.equal(unauth.status, 401);
 
-  // Create order with auth
   const order = await json('POST', '/orders', {
     token,
     body: {
@@ -111,20 +101,17 @@ test('full flow: register, login, browse, order, history', async () => {
   assert.match(order.data.order.numero, /^HPX-\d{4}$/);
   assert.ok(order.data.order.userId, 'order is linked to the user');
 
-  // Invalid payment rejected
   const badPay = await json('POST', '/orders', {
     token,
     body: { produtoId: product.id, tamanho: product.tamanhos[0], pagamento: 'Cartao' },
   });
   assert.equal(badPay.status, 400);
 
-  // Order history scoped to the user
   const history = await json('GET', '/orders', { token });
   assert.equal(history.status, 200);
   assert.equal(history.data.length, 1);
   assert.equal(history.data[0].numero, order.data.order.numero);
 
-  // Unknown route
   const missing = await json('GET', '/nope');
   assert.equal(missing.status, 404);
 });

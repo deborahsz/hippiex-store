@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { create } from 'axios';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
@@ -40,8 +40,7 @@ export function getImageUrl(imagePath) {
   return `${API_BASE_URL}${imagePath.startsWith('/') ? '' : '/'}${imagePath}`;
 }
 
-// eslint-disable-next-line import/no-named-as-default-member
-const api = axios.create({
+const api = create({
   baseURL: API_BASE_URL,
   timeout: 8000,
 });
