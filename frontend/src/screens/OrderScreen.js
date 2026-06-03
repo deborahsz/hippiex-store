@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Button, Header } from '../components';
+import { Button } from '../components';
 import api from '../services/api';
+import { formatPrice } from '../utils/format';
 
 const PAYMENT_OPTIONS = ['Pix', 'Dinheiro'];
 
 export default function OrderScreen({ navigation, route }) {
   const product = route.params?.product;
+  const tipo = route.params?.tipo === 'compra' ? 'compra' : 'reserva';
+  const isPurchase = tipo === 'compra';
+
   const sizes = product?.tamanhos || ['P', 'M', 'G'];
   const [selectedSize, setSelectedSize] = useState(sizes[0]);
   const [selectedPayment, setSelectedPayment] = useState(PAYMENT_OPTIONS[0]);
@@ -25,9 +29,10 @@ export default function OrderScreen({ navigation, route }) {
       setError('');
 
       const response = await api.post('/orders', {
-        pagamento: selectedPayment,
         produtoId: product.id,
         tamanho: selectedSize,
+        pagamento: selectedPayment,
+        tipo,
       });
 
       navigation.navigate('Confirmation', {
@@ -45,13 +50,25 @@ export default function OrderScreen({ navigation, route }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Header title="Reserva/Pedido" subtitle="Escolha tamanho e forma de pagamento." />
+      <Text style={styles.heading}>
+        {isPurchase ? 'Finalizar compra' : 'Fazer reserva'}
+      </Text>
+      <Text style={styles.subtitle}>
+        {isPurchase
+          ? 'Escolha o tamanho e a forma de pagamento. O pagamento é combinado fora do app.'
+          : 'Reserve sua camiseta e combine os detalhes depois com a loja.'}
+      </Text>
+
       {product ? (
         <View style={styles.productCard}>
           <Text style={styles.productLabel}>Produto</Text>
           <Text style={styles.productName}>{product.nome}</Text>
+          {product.preco ? (
+            <Text style={styles.productPrice}>{formatPrice(product.preco)}</Text>
+          ) : null}
         </View>
       ) : null}
+
       <Text style={styles.sectionTitle}>Tamanho</Text>
       <View style={styles.options}>
         {sizes.map((size) => (
@@ -59,10 +76,7 @@ export default function OrderScreen({ navigation, route }) {
             key={size}
             disabled={loading}
             onPress={() => setSelectedSize(size)}
-            style={[
-              styles.option,
-              selectedSize === size && styles.selectedOption,
-            ]}
+            style={[styles.option, selectedSize === size && styles.selectedOption]}
           >
             <Text
               style={[
@@ -75,6 +89,7 @@ export default function OrderScreen({ navigation, route }) {
           </Pressable>
         ))}
       </View>
+
       <Text style={styles.sectionTitle}>Forma de pagamento</Text>
       <View style={styles.options}>
         {PAYMENT_OPTIONS.map((payment) => (
@@ -98,9 +113,10 @@ export default function OrderScreen({ navigation, route }) {
           </Pressable>
         ))}
       </View>
+
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <Button loading={loading} onPress={handleSubmit}>
-        Finalizar Pedido
+        {isPurchase ? 'Confirmar compra' : 'Confirmar reserva'}
       </Button>
     </ScrollView>
   );
@@ -111,9 +127,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     flexGrow: 1,
     gap: 16,
-    justifyContent: 'center',
     padding: 24,
-    paddingTop: 60,
   },
   error: {
     backgroundColor: '#FCE8E8',
@@ -123,6 +137,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     padding: 12,
     textAlign: 'center',
+  },
+  heading: {
+    color: '#111111',
+    fontSize: 24,
+    fontWeight: '900',
   },
   option: {
     alignItems: 'center',
@@ -168,6 +187,12 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     marginTop: 4,
   },
+  productPrice: {
+    color: '#0F3D2E',
+    fontSize: 16,
+    fontWeight: '800',
+    marginTop: 4,
+  },
   sectionTitle: {
     color: '#111111',
     fontSize: 18,
@@ -178,5 +203,11 @@ const styles = StyleSheet.create({
   },
   selectedOptionText: {
     color: '#FFFFFF',
+  },
+  subtitle: {
+    color: '#555555',
+    fontSize: 15,
+    lineHeight: 22,
+    marginTop: -6,
   },
 });

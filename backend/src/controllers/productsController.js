@@ -1,27 +1,21 @@
-const fs = require('fs/promises');
-const path = require('path');
+const store = require('../lib/jsonStore');
+const AppError = require('../lib/AppError');
+const { validateProductId } = require('../lib/validators');
 
-const productsPath = path.resolve(__dirname, '../data/products.json');
+const productsPath = store.resolveDataPath('products.json');
 
-async function readProducts() {
-  const data = await fs.readFile(productsPath, 'utf-8');
-  return JSON.parse(data);
-}
-
-async function list(request, response) {
-  const products = await readProducts();
+async function list(_request, response) {
+  const products = await store.read(productsPath);
   return response.json(products);
 }
 
 async function show(request, response) {
-  const { id } = request.params;
-  const products = await readProducts();
-  const product = products.find((item) => item.id === Number(id));
+  const id = validateProductId(request.params.id);
+  const products = await store.read(productsPath);
+  const product = products.find((item) => item.id === id);
 
   if (!product) {
-    return response.status(404).json({
-      message: 'Produto não encontrado.',
-    });
+    throw new AppError('Produto não encontrado.', 404);
   }
 
   return response.json(product);

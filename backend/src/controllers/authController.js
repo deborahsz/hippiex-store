@@ -1,82 +1,77 @@
-const fs = require('fs/promises');
-const path = require('path');
+const bcrypt = require('bcryptjs');
 
-const usersPath = path.resolve(__dirname, '../data/users.json');
+const config = require('../config');
+const store = require('../lib/jsonStore');
+const AppError = require('../lib/AppError');
+const { signToken } = require('../middlewares/auth');
+const {
+  validateName,
+  validateEmail,
+  validatePassword,
+} = require('../lib/validators');
 
-async function readUsers() {
-  const data = await fs.readFile(usersPath, 'utf-8');
-  return JSON.parse(data);
+const usersPath = store.resolveDataPath('users.json');
+
+function nextId(items) {
+  return items.reduce((max, item) => Math.max(max, item.id || 0), 0) + 1;
 }
 
-async function saveUsers(users) {
-  await fs.writeFile(usersPath, JSON.stringify(users, null, 2));
+function publicUser(user) {
+  const { senha: _senha, ...rest } = user;
+  return rest;
 }
 
 async function register(request, response) {
-  const { nome, email, senha } = request.body;
+  const nome = validateName(request.body.nome);
+  const email = validateEmail(request.body.email);
+  const senha = validatePassword(request.body.senha);
 
-  if (!nome || !email || !senha) {
-    return response.status(400).json({
-      message: 'Nome, email e senha são obrigatórios.',
-    });
-  }
+  const senhaHash = await bcrypt.hash(senha, config.bcryptRounds);
 
-  const users = await readUsers();
-  const normalizedEmail = email.trim().toLowerCase();
-  const userExists = users.some((user) => user.email === normalizedEmail);
+  const user = await store.update(usersPath, (users) => {
+    if (users.some((item) => item.email === email)) {
+      throw new AppError('Já existe uma conta com este email.', 409);
+    }
 
-  if (userExists) {
-    return response.status(409).json({
-      message: 'Já existe uma conta com este email.',
-    });
-  }
+    const newUser = {
+      id: nextId(users),
+      nome,
+      email,
+      senha: senhaHash,
+      createdAt: new Date().toISOString(),
+    };
 
-  const user = {
-    id: users.length + 1,
-    nome: nome.trim(),
-    email: normalizedEmail,
-    senha,
-    createdAt: new Date().toISOString(),
-  };
-
-  users.push(user);
-  await saveUsers(users);
-
-  const { senha: _senha, ...userWithoutPassword } = user;
+    return { value: [...users, newUser], result: newUser };
+  });
 
   return response.status(201).json({
     message: 'Conta criada com sucesso.',
-    user: userWithoutPassword,
+    token: signToken(user),
+    user: publicUser(user),
   });
 }
 
 async function login(request, response) {
-  const { email, senha } = request.body;
+  const email = validateEmail(request.body.email);
+  const senha = validatePassword(request.body.senha);
 
-  if (!email || !senha) {
-    return response.status(400).json({
-      message: 'Email e senha são obrigatórios.',
-    });
+  const users = await store.read(usersPath);
+  const user = users.find((item) => item.email === email);
+
+  // Always run a comparison to keep timing consistent whether or not the
+  // email exists, then fail with a single generic message.
+  const matches = user
+    ? await bcrypt.compare(senha, user.senha)
+    : await bcrypt.compare(senha, '$2a$10$invalidinvalidinvalidinvalidinv');
+
+  if (!user || !matches) {
+    throw new AppError('Email ou senha inválidos.', 401);
   }
-
-  const users = await readUsers();
-  const normalizedEmail = email.trim().toLowerCase();
-  const user = users.find(
-    (registeredUser) =>
-      registeredUser.email === normalizedEmail && registeredUser.senha === senha
-  );
-
-  if (!user) {
-    return response.status(401).json({
-      message: 'Email ou senha inválidos.',
-    });
-  }
-
-  const { senha: _senha, ...userWithoutPassword } = user;
 
   return response.json({
     message: 'Login realizado com sucesso.',
-    user: userWithoutPassword,
+    token: signToken(user),
+    user: publicUser(user),
   });
 }
 

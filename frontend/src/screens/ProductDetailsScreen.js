@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Button, Header, Loading } from '../components';
+import { Button, Loading } from '../components';
 import api, { getImageUrl } from '../services/api';
+import { formatPrice } from '../utils/format';
 
-function formatPrice(price) {
-  return Number(price || 0).toLocaleString('pt-BR', {
-    currency: 'BRL',
-    style: 'currency',
-  });
-}
-
-function formatDescription(description) {
-  return description
+function splitDescription(description) {
+  return (description || '')
     .split('.')
     .map((item) => item.trim())
     .filter(Boolean);
@@ -35,7 +29,7 @@ export default function ProductDetailsScreen({ navigation, route }) {
         setError('');
         const response = await api.get(`/products/${productId}`);
         setProduct(response.data);
-      } catch (requestError) {
+      } catch {
         setError('Não foi possível carregar os detalhes da camiseta.');
       } finally {
         setLoading(false);
@@ -45,10 +39,8 @@ export default function ProductDetailsScreen({ navigation, route }) {
     loadProductDetails();
   }, [product, productId]);
 
-  function handleOrder() {
-    navigation.navigate('Order', {
-      product,
-    });
+  function startOrder(tipo) {
+    navigation.navigate('Order', { product, tipo });
   }
 
   if (loading) {
@@ -62,24 +54,24 @@ export default function ProductDetailsScreen({ navigation, route }) {
   if (error || !product) {
     return (
       <View style={styles.centerContainer}>
-        <Header title="Detalhes da Camiseta" />
-        <Text style={styles.error}>
-          {error || 'Camiseta não encontrada.'}
-        </Text>
+        <Text style={styles.error}>{error || 'Camiseta não encontrada.'}</Text>
         <Button onPress={() => navigation.goBack()}>Voltar</Button>
       </View>
     );
   }
 
   const imageUrl = getImageUrl(product.imagem);
-  const descriptionItems = formatDescription(product.descricao);
+  const descriptionItems = splitDescription(product.descricao);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Header title="Detalhes da Camiseta" />
       <View style={styles.imageWrapper}>
         {imageUrl ? (
-          <Image resizeMode="contain" source={{ uri: imageUrl }} style={styles.image} />
+          <Image
+            resizeMode="contain"
+            source={{ uri: imageUrl }}
+            style={styles.image}
+          />
         ) : (
           <Text style={styles.imageText}>Foto em breve</Text>
         )}
@@ -96,15 +88,15 @@ export default function ProductDetailsScreen({ navigation, route }) {
       </View>
       <Text style={styles.sectionTitle}>Descrição</Text>
       <View style={styles.descriptionList}>
-        {descriptionItems.map((item) => (
-          <Text key={item} style={styles.description}>
+        {descriptionItems.map((item, index) => (
+          <Text key={`desc-${index}`} style={styles.description}>
             {item}
           </Text>
         ))}
       </View>
       <View style={styles.actions}>
-        <Button onPress={handleOrder}>Reservar</Button>
-        <Button variant="secondary" onPress={handleOrder}>
+        <Button onPress={() => startOrder('reserva')}>Reservar</Button>
+        <Button variant="secondary" onPress={() => startOrder('compra')}>
           Comprar
         </Button>
       </View>
@@ -120,6 +112,7 @@ const styles = StyleSheet.create({
   centerContainer: {
     backgroundColor: '#FFFFFF',
     flex: 1,
+    gap: 16,
     justifyContent: 'center',
     padding: 24,
   },
@@ -127,7 +120,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     flexGrow: 1,
     padding: 24,
-    paddingTop: 60,
   },
   descriptionList: {
     gap: 8,
@@ -143,7 +135,6 @@ const styles = StyleSheet.create({
     color: '#B00020',
     fontSize: 15,
     fontWeight: '700',
-    marginBottom: 16,
     padding: 14,
     textAlign: 'center',
   },

@@ -2,13 +2,11 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 
 import Button from './Button';
 import { getImageUrl } from '../services/api';
+import { formatPrice } from '../utils/format';
 
 export default function ProductCard({ product, onDetails }) {
   const imageUrl = getImageUrl(product?.imagem);
-  const formattedPrice = Number(product?.preco || 0).toLocaleString('pt-BR', {
-    currency: 'BRL',
-    style: 'currency',
-  });
+  const formattedPrice = formatPrice(product?.preco);
 
   return (
     <View style={styles.card}>

@@ -1,9 +1,10 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Button, Header } from '../components';
+import { Button } from '../components';
 
 export default function ConfirmationScreen({ navigation, route }) {
   const order = route.params?.order;
+  const isPurchase = order?.tipo === 'compra';
 
   function handleBackToCatalog() {
     navigation.reset({
@@ -17,11 +18,17 @@ export default function ConfirmationScreen({ navigation, route }) {
       <View style={styles.successIcon}>
         <Text style={styles.successIconText}>OK</Text>
       </View>
-      <Header
-        title="Pedido realizado com sucesso"
-        subtitle="Sua reserva foi registrada. O pagamento será combinado fora do app."
-      />
+      <Text style={styles.title}>
+        {isPurchase ? 'Pedido realizado com sucesso' : 'Reserva registrada com sucesso'}
+      </Text>
+      <Text style={styles.subtitle}>
+        {isPurchase
+          ? 'Seu pedido foi registrado. O pagamento será combinado fora do app.'
+          : 'Sua reserva foi registrada. A loja entrará em contato para combinar os detalhes.'}
+      </Text>
       <View style={styles.card}>
+        <Text style={styles.label}>Tipo:</Text>
+        <Text style={styles.value}>{isPurchase ? 'Compra' : 'Reserva'}</Text>
         <Text style={styles.label}>Produto:</Text>
         <Text style={styles.value}>{order?.produto?.nome || 'A definir'}</Text>
         <Text style={styles.label}>Tamanho:</Text>
@@ -61,6 +68,13 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 1,
   },
+  subtitle: {
+    color: '#555555',
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: 24,
+    textAlign: 'center',
+  },
   successIcon: {
     alignItems: 'center',
     alignSelf: 'center',
@@ -75,6 +89,13 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 20,
     fontWeight: '900',
+  },
+  title: {
+    color: '#111111',
+    fontSize: 22,
+    fontWeight: '900',
+    marginBottom: 8,
+    textAlign: 'center',
   },
   value: {
     color: '#111111',

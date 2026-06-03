@@ -1,22 +1,24 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Header, Input } from '../components';
-import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function RegisterScreen({ navigation }) {
+  const { signUp } = useAuth();
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  function goToCatalog() {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Catalog' }],
-    });
-  }
 
   async function handleRegister() {
     setError('');
@@ -26,14 +28,15 @@ export default function RegisterScreen({ navigation }) {
       return;
     }
 
+    if (senha.length < 6) {
+      setError('A senha deve ter pelo menos 6 caracteres.');
+      return;
+    }
+
     try {
       setLoading(true);
-      await api.post('/auth/register', {
-        email: email.trim(),
-        nome: nome.trim(),
-        senha,
-      });
-      goToCatalog();
+      // On success the navigator swaps to the app stack automatically.
+      await signUp({ nome: nome.trim(), email: email.trim(), senha });
     } catch (requestError) {
       const message =
         requestError.response?.data?.message ||
@@ -45,42 +48,67 @@ export default function RegisterScreen({ navigation }) {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Header title="Cadastro" subtitle="Crie sua conta para reservar camisetas." />
-        <View style={styles.form}>
-          <Input onChangeText={setNome} placeholder="Nome" value={nome} />
-          <Input
-            autoCapitalize="none"
-            keyboardType="email-address"
-            onChangeText={setEmail}
-            placeholder="Email"
-            value={email}
-          />
-          <Input
-            onChangeText={setSenha}
-            placeholder="Senha"
-            secureTextEntry
-            value={senha}
-          />
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-          <Button loading={loading} onPress={handleRegister}>
-            Criar Conta
-          </Button>
-          <Button
-            disabled={loading}
-            variant="secondary"
-            onPress={() => navigation.goBack()}
-          >
-            Voltar para Login
-          </Button>
-        </View>
-      </View>
-    </View>
+    <SafeAreaView style={styles.safe}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.card}>
+            <Header
+              title="Cadastro"
+              subtitle="Crie sua conta para reservar camisetas."
+            />
+            <View style={styles.form}>
+              <Input
+                onChangeText={setNome}
+                placeholder="Nome"
+                value={nome}
+              />
+              <Input
+                autoCapitalize="none"
+                autoComplete="email"
+                keyboardType="email-address"
+                onChangeText={setEmail}
+                placeholder="Email"
+                value={email}
+              />
+              <Input
+                onChangeText={setSenha}
+                placeholder="Senha (mínimo 6 caracteres)"
+                secureTextEntry
+                value={senha}
+              />
+              {error ? <Text style={styles.error}>{error}</Text> : null}
+              <Button loading={loading} onPress={handleRegister}>
+                Criar Conta
+              </Button>
+              <Button
+                disabled={loading}
+                variant="secondary"
+                onPress={() => navigation.goBack()}
+              >
+                Voltar para Login
+              </Button>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safe: {
+    backgroundColor: '#0F3D2E',
+    flex: 1,
+  },
+  flex: {
+    flex: 1,
+  },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
@@ -92,8 +120,7 @@ const styles = StyleSheet.create({
     shadowRadius: 18,
   },
   container: {
-    backgroundColor: '#0F3D2E',
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     padding: 24,
   },

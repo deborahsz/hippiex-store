@@ -1,21 +1,23 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button, Header, Input } from '../components';
-import api from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function LoginScreen({ navigation }) {
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  function goToCatalog() {
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Catalog' }],
-    });
-  }
 
   async function handleLogin() {
     setError('');
@@ -27,11 +29,8 @@ export default function LoginScreen({ navigation }) {
 
     try {
       setLoading(true);
-      await api.post('/auth/login', {
-        email: email.trim(),
-        senha,
-      });
-      goToCatalog();
+      // On success the navigator swaps to the app stack automatically.
+      await signIn({ email: email.trim(), senha });
     } catch (requestError) {
       const message =
         requestError.response?.data?.message ||
@@ -43,44 +42,62 @@ export default function LoginScreen({ navigation }) {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Header
-          title="Entrar"
-          subtitle="Acesse sua conta para reservar camisetas da Hippiex."
-        />
-        <View style={styles.form}>
-          <Input
-            autoCapitalize="none"
-            keyboardType="email-address"
-            onChangeText={setEmail}
-            placeholder="Email"
-            value={email}
-          />
-          <Input
-            onChangeText={setSenha}
-            placeholder="Senha"
-            secureTextEntry
-            value={senha}
-          />
-          {error ? <Text style={styles.error}>{error}</Text> : null}
-          <Button loading={loading} onPress={handleLogin}>
-            Entrar
-          </Button>
-          <Button
-            disabled={loading}
-            variant="secondary"
-            onPress={() => navigation.navigate('Register')}
-          >
-            Ir para Cadastro
-          </Button>
-        </View>
-      </View>
-    </View>
+    <SafeAreaView style={styles.safe}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.card}>
+            <Header
+              title="Entrar"
+              subtitle="Acesse sua conta para reservar camisetas da Hippiex."
+            />
+            <View style={styles.form}>
+              <Input
+                autoCapitalize="none"
+                autoComplete="email"
+                keyboardType="email-address"
+                onChangeText={setEmail}
+                placeholder="Email"
+                value={email}
+              />
+              <Input
+                onChangeText={setSenha}
+                placeholder="Senha"
+                secureTextEntry
+                value={senha}
+              />
+              {error ? <Text style={styles.error}>{error}</Text> : null}
+              <Button loading={loading} onPress={handleLogin}>
+                Entrar
+              </Button>
+              <Button
+                disabled={loading}
+                variant="secondary"
+                onPress={() => navigation.navigate('Register')}
+              >
+                Ir para Cadastro
+              </Button>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safe: {
+    backgroundColor: '#0F3D2E',
+    flex: 1,
+  },
+  flex: {
+    flex: 1,
+  },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
@@ -92,8 +109,7 @@ const styles = StyleSheet.create({
     shadowRadius: 18,
   },
   container: {
-    backgroundColor: '#0F3D2E',
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     padding: 24,
   },
