@@ -1,20 +1,27 @@
 import { Image, StyleSheet, Text, View } from 'react-native';
 
 import Button from './Button';
+import { getImageUrl } from '../services/api';
 
 export default function ProductCard({ product, onDetails }) {
+  const imageUrl = getImageUrl(product?.imagem);
+  const formattedPrice = Number(product?.preco || 0).toLocaleString('pt-BR', {
+    currency: 'BRL',
+    style: 'currency',
+  });
+
   return (
     <View style={styles.card}>
       <View style={styles.imageWrapper}>
-        {product?.imagem ? (
-          <Image source={{ uri: product.imagem }} style={styles.image} />
+        {imageUrl ? (
+          <Image resizeMode="cover" source={{ uri: imageUrl }} style={styles.image} />
         ) : (
           <Text style={styles.imagePlaceholder}>Imagem em breve</Text>
         )}
       </View>
       <View style={styles.content}>
         <Text style={styles.name}>{product?.nome || 'Camiseta Hippiex'}</Text>
-        <Text style={styles.price}>R$ {Number(product?.preco || 0).toFixed(2)}</Text>
+        <Text style={styles.price}>{formattedPrice}</Text>
         <Button onPress={onDetails}>Ver Detalhes</Button>
       </View>
     </View>
