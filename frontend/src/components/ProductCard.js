@@ -14,7 +14,7 @@ export default function ProductCard({ product, onDetails }) {
     <View style={styles.card}>
       <View style={styles.imageWrapper}>
         {imageUrl ? (
-          <Image resizeMode="cover" source={{ uri: imageUrl }} style={styles.image} />
+          <Image resizeMode="contain" source={{ uri: imageUrl }} style={styles.image} />
         ) : (
           <Text style={styles.imagePlaceholder}>Imagem em breve</Text>
         )}
@@ -55,8 +55,8 @@ const styles = StyleSheet.create({
   },
   imageWrapper: {
     alignItems: 'center',
-    backgroundColor: '#0F3D2E',
-    height: 190,
+    backgroundColor: '#111111',
+    height: 210,
     justifyContent: 'center',
   },
   name: {

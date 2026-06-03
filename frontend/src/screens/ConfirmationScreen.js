@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Header } from '../components';
 
@@ -13,7 +13,7 @@ export default function ConfirmationScreen({ navigation, route }) {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.successIcon}>
         <Text style={styles.successIconText}>OK</Text>
       </View>
@@ -32,13 +32,13 @@ export default function ConfirmationScreen({ navigation, route }) {
         <Text style={styles.orderNumber}>{order?.numero || 'A definir'}</Text>
       </View>
       <Button onPress={handleBackToCatalog}>Voltar ao catálogo</Button>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: '#F4F7F5',
     borderRadius: 18,
     gap: 6,
     marginBottom: 24,
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: '#FFFFFF',
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     padding: 24,
   },

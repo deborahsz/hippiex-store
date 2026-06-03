@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Header } from '../components';
 import api from '../services/api';
@@ -44,7 +44,7 @@ export default function OrderScreen({ navigation, route }) {
   }
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Header title="Reserva/Pedido" subtitle="Escolha tamanho e forma de pagamento." />
       {product ? (
         <View style={styles.productCard}>
@@ -102,15 +102,16 @@ export default function OrderScreen({ navigation, route }) {
       <Button loading={loading} onPress={handleSubmit}>
         Finalizar Pedido
       </Button>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#FFFFFF',
-    flex: 1,
+    flexGrow: 1,
     gap: 16,
+    justifyContent: 'center',
     padding: 24,
     paddingTop: 60,
   },

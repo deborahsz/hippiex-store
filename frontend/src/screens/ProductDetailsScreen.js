@@ -79,7 +79,7 @@ export default function ProductDetailsScreen({ navigation, route }) {
       <Header title="Detalhes da Camiseta" />
       <View style={styles.imageWrapper}>
         {imageUrl ? (
-          <Image resizeMode="cover" source={{ uri: imageUrl }} style={styles.image} />
+          <Image resizeMode="contain" source={{ uri: imageUrl }} style={styles.image} />
         ) : (
           <Text style={styles.imageText}>Foto em breve</Text>
         )}
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   },
   imageWrapper: {
     alignItems: 'center',
-    backgroundColor: '#0F3D2E',
+    backgroundColor: '#111111',
     borderRadius: 18,
     height: 260,
     justifyContent: 'center',

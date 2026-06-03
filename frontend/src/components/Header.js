@@ -17,9 +17,9 @@ const styles = StyleSheet.create({
   },
   logo: {
     color: '#0F3D2E',
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: '900',
-    letterSpacing: 3,
+    letterSpacing: 4,
   },
   title: {
     color: '#111111',
@@ -29,5 +29,6 @@ const styles = StyleSheet.create({
   subtitle: {
     color: '#555555',
     fontSize: 15,
+    lineHeight: 22,
   },
 });

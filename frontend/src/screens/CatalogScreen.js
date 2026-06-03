@@ -78,7 +78,7 @@ export default function CatalogScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F4F7F5',
     flexGrow: 1,
     padding: 24,
     paddingTop: 60,
